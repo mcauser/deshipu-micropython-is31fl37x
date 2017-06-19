@@ -60,19 +60,11 @@ class PewPew(Matrix8x8x2):
         self._page(0)
         self.i2c.writeto_mem(self.address, 0x12, b'\x3f')
 
-    def scan(self):
-        brightness = self.brightness()
-        self.brightness(1)
-        self._config(0x00, 0x05)
-        utime.sleep_ms(3)
-        self.brightness(brightness)
-        self._page(0)
-        buttons = self.i2c.readfrom_mem(self.address, 0x2a, 1)[0]
-        self._config(0x00, 0x01)
-        return buttons
-
 
 class Matrix7x11(_Base):
+    _COLS = (0, 5, 1, 6, 4, 2, 3)
+    _ROWS = (6, 7, 5, 8, 4, 3, 9, 2, 10, 1, 0)
+
     def __init__(self, i2c, address=80):
         super().__init__(i2c, address)
         self.active(1)
@@ -83,4 +75,4 @@ class Matrix7x11(_Base):
     def pixel(self, x, y, color):
         if not (0 <= x <= 6 and 0 <= y <= 10):
             return
-        self._pixel(x * 2, y * 2, color & 0xff)
+        self._pixel(self._COLS[x] * 2, self._ROWS[y] * 2, color & 0xff)
