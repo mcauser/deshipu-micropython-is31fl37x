@@ -76,3 +76,19 @@ class Matrix7x11(_Base):
         if not (0 <= x <= 6 and 0 <= y <= 10):
             return
         self._pixel(self._COLS[x] * 2, self._ROWS[y] * 2, color & 0xff)
+
+
+class Matrix14x11(_Base):
+    _COLS = (8, 4, 9, 2, 7, 3, 5, 0, 6, 1, 11, 13, 10, 12)
+
+    def __init__(self, i2c, address=80):
+        super().__init__(i2c, address)
+        self.active(1)
+        self.brightness(127)
+        self._page(0)
+        self.i2c.writeto_mem(self.address, 0, b'\xff\x3f' * 11)
+
+    def pixel(self, x, y, color):
+        if not (0 <= x <= 13 and 0 <= y <= 10):
+            return
+        self._pixel(self._COLS[x], 20 - y * 2, color & 0xff)
