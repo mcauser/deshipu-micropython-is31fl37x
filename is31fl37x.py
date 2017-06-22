@@ -28,7 +28,7 @@ class _Base:
     def _pixel(self, x, y, color):
         self._page(1)
         self._i2c_buffer[0] = color
-        self.i2c.writeto_mem(self.address, x + y * 8, self._i2c_buffer)
+        self.i2c.writeto_mem(self.address, x + y * 16, self._i2c_buffer)
 
     def brightness(self, value=None):
         if value is None:
@@ -51,7 +51,7 @@ class Matrix8x8x2(_Base):
         if not (0 <= x <= 7 and 0 <= y <= 7):
             return
         self._pixel(x, y * 2, color & 0xff)
-        self._pixel(7 - x, y * 2 + 1, (color >> 8) & 0xff)
+        self._pixel(7 - x, y + 1, (color >> 8) & 0xff)
 
 
 class PewPew(Matrix8x8x2):
@@ -75,7 +75,7 @@ class Matrix7x11(_Base):
     def pixel(self, x, y, color):
         if not (0 <= x <= 6 and 0 <= y <= 10):
             return
-        self._pixel(self._COLS[x] * 2, self._ROWS[y] * 2, color & 0xff)
+        self._pixel(self._COLS[x] * 2, self._ROWS[y], color & 0xff)
 
 
 class Matrix14x11(_Base):
@@ -91,4 +91,12 @@ class Matrix14x11(_Base):
     def pixel(self, x, y, color):
         if not (0 <= x <= 13 and 0 <= y <= 10):
             return
-        self._pixel(self._COLS[x], 20 - y * 2, color & 0xff)
+        self._pixel(self._COLS[x], 10 - y, color & 0xff)
+
+    def blit(self, data):
+        buffer = bytearray(14)
+        self._page(1)
+        for y, row in enumerate(data):
+            for x, pixel in zip(self._COLS, row):
+                buffer[x] = pixel
+            self.i2c.writeto_mem(self.address, (10 - y) * 16, buffer)
