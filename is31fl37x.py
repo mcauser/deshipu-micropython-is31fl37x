@@ -8,8 +8,12 @@ class _Base:
         self._i2c_buffer = bytearray(1)
         self._brightness = 0
         self._active = False
+        self._current_page = None
 
     def _page(self, page):
+        if page == self._current_page:
+            return
+        self._current_page = page
         self.i2c.writeto_mem(self.address, 0xfe, b'\xc5')
         self._i2c_buffer[0] = page
         self.i2c.writeto_mem(self.address, 0xfd, self._i2c_buffer)
